@@ -1,6 +1,8 @@
-from g2_gateway import *;
+from g2_gateway import *
+from scraper.scraper import *
 
 if __name__ == "__main__":
-    # print(get_countries())
-    print(search_customer("67 TAYLOR LN", "MINERAL BLUFF", "BEG TEXTILES", "30559", "GA"))
-    # print(search_customer_by_address("67 TAYLOR LN", "1"))
+    order = parse_coupa_file("service/purchase_order.html")
+    # print(search_customer("67 TAYLOR LN", "MINERAL BLUFF", "BEG TEXTILES", "30559", "GA").address.addressLine1)
+    # print(search_contact("Robert Allen", "Robert.Allen@stericycle.com"))
+    print(order)

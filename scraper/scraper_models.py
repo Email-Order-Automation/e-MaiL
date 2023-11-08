@@ -10,6 +10,27 @@ class OrderLine:
         self.price = price
         self.total = total
 
+########################################################################################
+
+class Address:
+    def __init__(self, address1, address2, city, state, postal, postal_ext):
+        self.address1 = address1
+        self.address2 = address2
+        self.city = city
+        self.state = state
+        self.postal = postal
+        self.postal_ext = postal_ext
+
+########################################################################################              
+
+class Order:
+    def __init__(self, order_lines, bill_to, ship_to):
+        self.order_lines = order_lines
+        self.bill_to = bill_to
+        self.ship_to = ship_to
+
+########################################################################################
+
 class Rows(Enum):
     LINE_NUM = 0
     DESCRIPTION = 1
