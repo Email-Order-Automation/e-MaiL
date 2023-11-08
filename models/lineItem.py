@@ -6,4 +6,4 @@ class LineItem:
         self.price = price
         self.extendedPrice = extendedPrice
         self.warehouse = warehouse
-        self.via =via
+        self.via = via
