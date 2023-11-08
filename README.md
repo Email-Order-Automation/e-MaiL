@@ -7,3 +7,5 @@ Goals
 4. Call g2 endpoints to make checkout request and submit
 5. Email response from g2 back to customer
 ## 6. Rename project e-ML
+
+andrew change
