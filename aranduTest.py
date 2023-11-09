@@ -1,4 +1,5 @@
 import win32com.client
+from utils import *
 
 
 def test():
@@ -20,6 +21,7 @@ def test():
         if 'Purchase Order #' in m.Subject:
             if 'coupahost.com' in m.Sender.GetExchangeUser().PrimarySmtpAddress:
                 email_address = m.Sender.GetExchangeUser().PrimarySmtpAddress
+                
 
             if 'ansmtp.ariba.com' in m.Sender.GetExchangeUser().PrimarySmtpAddress:
                 email_address = m.Sender.GetExchangeUser().PrimarySmtpAddress
@@ -31,4 +33,5 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    # test()
+    convert_pdf_to_html("C:\\Users\\Jacob.Powers\\Desktop\\eMaiL\\service\\TTM_Purchase_Order_2200101393.pdf")

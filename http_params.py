@@ -2,6 +2,8 @@ CONTENT_TYPE = "Content-Type"
 CONTENT = "Content-"
 APPLICATION_JSON = "application/json"
 
+UTF8 = "utf8"
+
 AUTHORIZATION = "Authorization"
 BASIC = "Basic cGVyZm9ybTU6VWxpbmUxMjM="
 BEARER = "Bearer"
@@ -31,11 +33,14 @@ AUTO_ASSIGN_NUM = "autoAssignOrderNumber"
 FIVE_BILLION = 5000000000
 
 ADDRESS_LINE = "addressLine"
+ADDRESS_LINE1 = "addressLine1"
 CITY = "city"
 CUSTOMER_NAME = "customerName"
 CUSTOMER_NUMBER = "customerNumber"
 POSTAL_CODE = "postalCode"
 STATE_PROV_CODE = "stateProvinceCode"
+STATE = "state"
+ZIP = "zipCode"
 
 NAME = "name"
 EMAIL = "emailAddress"
@@ -76,5 +81,8 @@ GENERAL_INFO = "generalInfo"
 CHECKOUT_REQ_ID = "checkoutRequestId"
 
 LINE = "line"
+
+CUST_MARKED_DEL = "customerMarkedForDeletion"
+MARKED_DEL = "markedForDeletion"
 
 EMPTY = ""

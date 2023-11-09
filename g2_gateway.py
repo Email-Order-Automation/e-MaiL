@@ -14,24 +14,31 @@ def get_uline_token():
         AUTHORIZATION: BASIC
     }
 
-    response = requests.request(POST, SECURITY_AUTH_URL, headers=headers, data="")
+    response = requests.request(POST, SECURITY_AUTH_URL, headers=headers, data=EMPTY)
 
-    json_data = json.loads(response.text)
-    return(json_data[TOKEN])
+    obj = create_object(response.text)
+
+    if isHttpError(obj): 
+        raise ConnectionError("Error getting bearer token")
+    else: return obj.token
+    
 
 ########################################################################################
 
-ULINE_TOKEN = get_uline_token()
 STANDARD_HEADERS = {
         CONTENT_TYPE: APPLICATION_JSON,
-        AUTHORIZATION: BEARER + " " + ULINE_TOKEN
+        AUTHORIZATION: BEARER + " " + get_uline_token()
     }
 
 ########################################################################################
 
 def get_order_number():
     response = requests.request(POST, ORDER_NUMBER_URL, headers=STANDARD_HEADERS, data="{}")
-    return json.loads(response.text)[ORDER_NUMBER] + FIVE_BILLION
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        raise ConnectionError("Error getting new order number from order service")
+    else: return obj.orderNumber + FIVE_BILLION
 
 ########################################################################################
 
@@ -53,73 +60,75 @@ def create_checkout_request(order_number, shipToCustomer, contact):
     })
 
     response = requests.request(POST, OES_CHECKOUT_REQ_URL, headers=STANDARD_HEADERS, data=payload)
-    return create_object(response.text)
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        raise ConnectionError("Error creating checkout request for order number: " + str(order_number) + " and customer ID: " + str(shipToCustomer.customerId))
+    else: return obj
 
 ########################################################################################    
 
-def search_customer(address_line, city, customer_name, postal_code, state_province_code):
+def search_customer(address):
     url = CUSTOMER_SEARCH_URL
-    url += generate_param(ADDRESS_LINE, address_line)
-    url += generate_param(CITY, city)
-    url += generate_param(POSTAL_CODE, postal_code)
-    url += generate_param(STATE_PROV_CODE, state_province_code)
-    url += generate_param("markedForDeletion", False)
+    url += generate_param(ADDRESS_LINE, address.get(ADDRESS_LINE1))
+    url += generate_param(CITY, address.get(CITY))
+    url += generate_param(POSTAL_CODE, address.get(ZIP))
+    url += generate_param(STATE_PROV_CODE, address.get(STATE))
+    url += generate_param(MARKED_DEL, False)
 
     response = requests.request(GET, url, headers=STANDARD_HEADERS)
-    return create_object(response.text)
+    obj = create_object(response.text)
 
-########################################################################################
+    if isHttpError(obj):
+        raise ConnectionError("Error in customer search")
+    else: return obj
 
-def match_contact(name, email, pageable):
-    content = pageable.content
-    for contact in content:
-        if contact.contactName.lower() == name.lower() and contact.emailAddress.lower() == email.lower():
-            return contact
-
-########################################################################################    
+######################################################################################## 
     
-def search_contact(name, emailAddress):
+def search_contact(name, email):
     url = CONTACT_SEARCH_URL
     url += generate_param(NAME, name)
-    url += generate_param(EMAIL, emailAddress)
-    url += generate_param("customerMarkedForDeletion", False)
+    url += generate_param(EMAIL, email)
+    url += generate_param(CUST_MARKED_DEL, False)
 
     response = requests.request(GET, url, headers=STANDARD_HEADERS)
-    return match_contact(name, emailAddress, create_object(response.text))
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        raise ConnectionError("Error in contact search")    
+    else: return match_contact(name, email, obj)
     
-########################################################################################    
-
-def convert_customer_to_billto(customer):
-    url = BILL_TO_URL
-    url += generate_param(CUSTOMER_NUMBER, customer.customerId)
-    url += generate_param(COMPANY_CODE, customer.companyCode)
-
-    response = requests.request(GET, url, headers=STANDARD_HEADERS)
-    return create_object(response.text)
-
 ########################################################################################
 
-def add_line(checkout_request_id, item_id, quantity, extended_price):
+def add_line(cr_id, item_id, qty, ext_price):
     payload = json.dumps({
         LINES: [
             {
             ITEM_ID: item_id,
             PRODUCT_ID: None,
-            SELLABLE_ORDERED_QTY: quantity,
-            EXT_PRICE: extended_price,
+            SELLABLE_ORDERED_QTY: qty,
+            EXT_PRICE: ext_price,
             RA_CODE: EMPTY
             }
         ]
         })
 
-    response = requests.request(POST, OES_LINES_URL.format(checkout_request_id), headers=STANDARD_HEADERS, data=payload)
-    return json.loads(response.text)
+    response = requests.request(POST, OES_LINES_URL.format(cr_id), headers=STANDARD_HEADERS, data=payload)
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        raise ConnectionError("Error adding order line to checkout request: " + str(cr_id))
+    else: return obj
 
 ########################################################################################    
 
-def compute_order_summary(checkout_request_id):
-    response = requests.request(POST, OES_SUMMARY_URL.format(checkout_request_id), headers=STANDARD_HEADERS, data="{}")
-    return json.loads(response.text)
+def compute_order_summary(cr_id):
+    response = requests.request(POST, OES_SUMMARY_URL.format(cr_id), headers=STANDARD_HEADERS, data="{}")
+    obj = create_object(response.text)
+
+    if isHttpError(obj): 
+        raise ConnectionError("Error computing order summary for checkout request: " + str(cr_id))
+    else: return obj
 
 ########################################################################################
 
@@ -130,13 +139,16 @@ def line_preperation(model_number, quantity):
         QTY : quantity,
         RA_CODE : EMPTY
     })
-
     response = requests.request(POST, OES_LINE_PREP_URL, headers=STANDARD_HEADERS, data=payload)
-    return json.loads(response.text)
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        raise ConnectionError("Error preparing line information for model number: " + str(model_number))
+    else: return obj
 
 ########################################################################################
 
-def submit_checkout_request(order_number, checkout_request_id, shipToCustomer, contact):
+def submit_checkout_request(order_number, cr_id, shipToCustomer, contact):
     payload = json.dumps({
         BILL_TO_CUSTOMER_ID: shipToCustomer.billToId,
         CONTACT_ID: contact.contactId,
@@ -160,54 +172,12 @@ def submit_checkout_request(order_number, checkout_request_id, shipToCustomer, c
         SUBMISSION_MODE: PARALLEL,
         KEEP_LOCKED: False
     })
-    response = requests.request(POST, OES_SUBMIT_URL.format(order_number, checkout_request_id), headers=STANDARD_HEADERS, data=payload)
-    return json.loads(response.text)
+    response = requests.request(POST, OES_SUBMIT_URL.format(order_number, cr_id), headers=STANDARD_HEADERS, data=payload)
+    obj = create_object(response.text)
 
-########################################################################################    
-
-def add_lines(cr_id, num_qty_dict):
-    for model, qty in num_qty_dict.items():
-        line = line_preperation(model, qty)
-        ext_prc = line[LINE][EXT_PRICE]
-        item_id = line[LINE][ITEM_ID]
-        
-        # checkoutRequestId, itemId, quantity, extendedPrice (price of individual item)
-        checkout_request = add_line(cr_id, item_id, qty, ext_prc)
-
-    return checkout_request    
+    if isHttpError(obj):
+        raise ConnectionError("Error submitting checkout request: " + str(cr_id) + " with order number: " + str(order_number))
+    else: return obj
 
 ########################################################################################
-
-def match_customer(pageable, address):
-    content = pageable.content 
-    for cust in content:
-        if clean(cust.address.addressLine1) == clean(address[1]):
-            if clean(cust.address.city) == clean(get_city(address[2])):
-                if cust.address.zipCode == get_zipcode(address[2]):
-                    if clean(cust.address.state) == clean(get_state(address[2])):
-                        return cust
-
-########################################################################################
-
-def runner(model_number_qty_dict, bill_to, ship_to, contact):
-
-    g2_order_number = get_order_number()
-    uline_contact = search_contact(contact.name, contact.email)
-
-    uline_shipto_pageable = search_customer(ship_to[1], get_city(ship_to[2]), uline_contact.customerName, get_zipcode(ship_to[2]), get_state(ship_to[2]))
-    shipToCustomer = match_customer(uline_shipto_pageable, ship_to)
-
-    checkout_request = create_checkout_request(g2_order_number, shipToCustomer, uline_contact)
-    print(checkout_request)
-
-    checkout_request_id = checkout_request.generalInfo.checkoutRequestId
-
-    checkout_request = add_lines(checkout_request_id, model_number_qty_dict)  
-
-    # Compute order summary and submit order
-    checkout_request = compute_order_summary(checkout_request_id)
-    checkout_request = submit_checkout_request(g2_order_number, checkout_request_id, shipToCustomer, uline_contact)
-    print(checkout_request)
-    
-########################################################################################    
    
