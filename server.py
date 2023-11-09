@@ -1,8 +1,8 @@
 from g2_gateway import *
-from scraper.scraper import *
+from scrapper.scrapper import *
 
 if __name__ == "__main__":
-    order = parse_coupa_file("service/purchase_order.html")
-    # print(search_customer("67 TAYLOR LN", "MINERAL BLUFF", "BEG TEXTILES", "30559", "GA").address.addressLine1)
-    # print(search_contact("Robert Allen", "Robert.Allen@stericycle.com"))
-    print(order)
+    with open("service/purchase_order.html", encoding="utf8") as fp:
+        order = parse_coupa_file(fp)
+    customer = search_customer(order.ship_to[1], get_city(order.ship_to[2]), order.ship_to[0], get_zipcode(order.ship_to[2]), get_state(order.ship_to[2]))
+    print(customer)

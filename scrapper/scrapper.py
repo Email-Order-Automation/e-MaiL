@@ -1,11 +1,15 @@
 from bs4 import BeautifulSoup
-from scraper_models import *
+from scrapper_models import *
 from pprint import pprint
 import re
 
+########################################################################################
+
 SHIP_TO = "Ship To"
 BILL_TO = "Bill To"
+CONTACT = "CONTACT"
 
+########################################################################################
 
 def get_element_content(stringer):
     return re.sub(' +', ' ', stringer.get_text().strip().replace("\n", ""))
@@ -62,7 +66,33 @@ def strip_order_address(addresses, add_type):
 
             return stripped_fields_list    
 
+########################################################################################
 
+def get_contact_data(table, label_idx, rows, row_idx):
+    name = get_element_content(table[label_idx + 1])
+    email_data = rows[row_idx + 1].find_all('td')
+    email = get_element_content(email_data[1])
+
+    return Contact(name, email)
+
+########################################################################################
+
+def strip_contact_info(po_info):
+    rows = po_info.find_all('tr')
+
+    row_idx = 0
+    for row in rows:
+        table_data = row.find_all('td')
+
+        contact_label_idx = 0
+        for cell in table_data:
+            text = get_element_content(cell)
+
+            if text == "CONTACT":
+                return get_contact_data(table_data, contact_label_idx, rows, row_idx)
+
+            contact_label_idx += 1
+        row_idx += 1
 
 ########################################################################################
 
@@ -75,7 +105,10 @@ def parse_coupa_file(order_file):
     address_data = order.find(id="addresses")
     bill_to = strip_order_address(address_data, BILL_TO)
     ship_to = strip_order_address(address_data, SHIP_TO)
+    
+    po_info = order.find(id="po_info")
+    contact = strip_contact_info(po_info)
 
-    return Order(order_lines, bill_to, ship_to)
+    return Order(order_lines, bill_to, ship_to, contact)
 
 ########################################################################################

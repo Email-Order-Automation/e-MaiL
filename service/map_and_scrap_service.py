@@ -1,7 +1,7 @@
 import sys
-sys.path.append("..\scraper")
+sys.path.append("..\\scrapper")
 sys.path.append("..")
-from scraper import parse_coupa_file
+from scrapper import parse_coupa_file
 from g2_gateway import runner
 
 ########################################################################################
@@ -33,13 +33,13 @@ def build_line_item():
         items = order.order_lines
         bill_to = order.bill_to
         ship_to = order.ship_to
+        contact = order.contact
 
         req = {}
         for item in items:
             req[get_uline_item_number(item.description)] = int(item.quantity)
-            print(req)
 
-        runner(req)
+        runner(req, bill_to, ship_to, contact)
 
 ########################################################################################
 

@@ -21,13 +21,21 @@ class Address:
         self.postal = postal
         self.postal_ext = postal_ext
 
+########################################################################################
+
+class Contact: 
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+
 ########################################################################################              
 
 class Order:
-    def __init__(self, order_lines, bill_to, ship_to):
+    def __init__(self, order_lines, bill_to, ship_to, contact):
         self.order_lines = order_lines
         self.bill_to = bill_to
         self.ship_to = ship_to
+        self.contact = contact
 
 ########################################################################################
 
