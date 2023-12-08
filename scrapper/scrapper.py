@@ -3,7 +3,7 @@ from scrapper_models import *
 from pprint import pprint
 import sys
 sys.path.append("..")
-from utils import *
+from uline_utils import *
 
 ########################################################################################
 
