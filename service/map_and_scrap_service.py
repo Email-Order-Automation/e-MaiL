@@ -112,5 +112,4 @@ def runner(model_number_qty_dict, ship_to, contact):
 ########################################################################################
 
 # TODO: PASS EMAILS INTO HERE INSTEAD OF BY NAME
-print("Input file name: ")
-parse_order_from_email(get_emails())
+parse_order_from_email(input("Input file name: "))
