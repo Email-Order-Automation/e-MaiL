@@ -76,6 +76,7 @@ SELECTED_SOURCE = "selectedSource"
 FTWEB = "FTWEB"
 SUBMISSION_MODE = "submissionMode"
 PARALLEL = "PARALLEL"
+PRIMARY = "PRIMARY"
 
 GENERAL_INFO = "generalInfo"
 CHECKOUT_REQ_ID = "checkoutRequestId"

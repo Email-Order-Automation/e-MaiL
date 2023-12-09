@@ -38,7 +38,7 @@ def get_order_number():
 
     if isHttpError(obj):
         raise ConnectionError("Error getting new order number from order service")
-    else: return obj.orderNumber + FIVE_BILLION
+    else: return obj.orderNumber #+ FIVE_BILLION
 
 ########################################################################################
 
@@ -169,7 +169,7 @@ def submit_checkout_request(order_number, cr_id, shipToCustomer, contact):
         SOURCE_APPLICATION: JOE_PHONE,
         SOURCE_CODE: FTWEB,
         MEXICO_USAGE_CODE: EMPTY,
-        SUBMISSION_MODE: PARALLEL,
+        SUBMISSION_MODE: PRIMARY,
         KEEP_LOCKED: False
     })
     response = requests.request(POST, OES_SUBMIT_URL.format(order_number, cr_id), headers=STANDARD_HEADERS, data=payload)
