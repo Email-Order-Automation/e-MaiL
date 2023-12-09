@@ -106,7 +106,6 @@ def runner(model_number_qty_dict, ship_to, contact):
     checkout_request = add_lines(checkout_request_id, model_number_qty_dict)  
     checkout_request = compute_order_summary(checkout_request_id)
 
-    print(checkout_request)
     checkout_order = submit_checkout_request(g2_order_number, checkout_request_id, shipToCustomer, uline_contact)
     print(checkout_order)
     
