@@ -15,6 +15,7 @@ OES_SUMMARY_URL = OES_BASE_URL + "/checkout-requests/{0}/summary"
 
 ORDER_BASE_URL = "http://dc2-svzgsys03.ulinedm.com:11174/order-service/v1"
 ORDER_NUMBER_URL = ORDER_BASE_URL + "/orders/order-number"
+GET_ORDER_URL = ORDER_BASE_URL + "/orders/{0}"
 
 ITEM_SERVICE_BASE_URL = "http://dc2-svzgsys01.ulinedm.com:21102/item-services/v2"
 
@@ -24,3 +25,6 @@ CONTACT_SEARCH_URL = CUSTOMER_SERVICE_BASE_URL + "/contacts/search?"
 BILL_TO_URL = CUSTOMER_SERVICE_BASE_URL + "/bill-tos"
 
 LOCATION_SERVICE_BASE_URL = "http://dc2-svzgsys05.ulinedm.com:21156/location-services/v2"
+
+ORDER_INTEGRATION_SERVICE_BASE_URL = "http://dc2-svzgsys07.ulinedm.com:11288/order-integration-service/v1"
+LEGACY_INTEGRATION_URL = ORDER_INTEGRATION_SERVICE_BASE_URL + "/legacy-integration"

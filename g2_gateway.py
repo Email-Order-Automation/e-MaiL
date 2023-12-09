@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 from client_urls import *
 from http_params import *
 from urllib.parse import urlencode
@@ -177,6 +178,54 @@ def submit_checkout_request(order_number, cr_id, shipToCustomer, contact):
 
     if isHttpError(obj):
         raise ConnectionError("Error submitting checkout request: " + str(cr_id) + " with order number: " + str(order_number))
+    else: return obj
+
+########################################################################################
+
+def integrate_order(order_number):
+    payload = json.dumps({
+        ORDER_NUMBER: order_number
+    })
+    response = requests.request(POST, LEGACY_INTEGRATION_URL, headers=STANDARD_HEADERS, data=payload)
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        return False
+    else: return True
+
+########################################################################################
+
+def wait_for_order_on_hold_pending_integration_or_new_order(order_number):
+    
+    num_checks = 0
+    order_status = None
+    while num_checks < 4:
+        order_response = get_order_response(order_number, SOURCED_FROM_DSE_ARG)
+        order_status = order_response.orderStatus
+        if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS or order_status == NEW_ORDER_STATUS):
+            return order_status
+        num_checks += 1
+        time.sleep(5)
+    if(order_status == PENDING_SUBMIT_POST_PROCESSING_STATUS):
+        raise ConnectionError("Order " + str(order_number) + " stuck in post processing")
+    else:
+        raise ConnectionError("Order " + str(order_number) + " stuck in processing")
+    
+
+
+########################################################################################
+
+def get_order_response(order_number, sourced_from):
+    
+    url = GET_ORDER_URL + "?"
+    url += generate_param(SOURCED_FROM_PARAM, sourced_from)
+    url = url.format(order_number)
+    
+    response = requests.request(GET, url, headers=STANDARD_HEADERS, data="{}")
+    obj = create_object(response.text)
+
+    if isHttpError(obj):
+        raise ConnectionError("Unable to get order with order number " + str(order_number))
     else: return obj
 
 ########################################################################################

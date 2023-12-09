@@ -108,8 +108,23 @@ def runner(model_number_qty_dict, ship_to, contact):
 
     checkout_order = submit_checkout_request(g2_order_number, checkout_request_id, shipToCustomer, uline_contact)
     print(checkout_order)
+    print("\nOrder " + str(checkout_order.generalInfo.orderNumber) + " created\nChecking for holds...")
+    order_status = wait_for_order_on_hold_pending_integration_or_new_order(g2_order_number)
+    if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS):
+        print("Order " + str(g2_order_number) + " on hold")
+    else:
+        print("Order " + str(g2_order_number) + " not on hold")
+    print("Integrating order...")
+        
+
+    integrate_order(g2_order_number)
+    order_response = get_order_response(g2_order_number, SOURCED_FROM_LEGACY_ARG)
+    if getattr(order_response, ORDER_STATUS_KEY):
+        print("Order " + str(g2_order_number) + " integrated to legacy\n")
+    else:
+        print("Order integration failed\n")
     
 ########################################################################################
 
 # TODO: PASS EMAILS INTO HERE INSTEAD OF BY NAME
-parse_order_from_email(input("Input file name: "))
+parse_order_from_email(input("\nInput file name: "))
