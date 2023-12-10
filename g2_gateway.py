@@ -199,7 +199,16 @@ def integrate_order(order_number):
     payload = json.dumps({
         ORDER_NUMBER: order_number
     })
-    response = requests.request(POST, LEGACY_INTEGRATION_URL, headers=STANDARD_HEADERS, data=payload)
+    num_tries = 0
+
+    while num_tries < 5:
+        response = requests.request(POST, LEGACY_INTEGRATION_URL, headers=STANDARD_HEADERS, data=payload)
+        order_response = get_order_response(order_number, SOURCED_FROM_DSE_ARG)
+        order_status = order_response.orderStatus
+        if(order_status == ON_HOLD_INTEGRATED_STATUS or order_status == NEW_ORDER_STATUS):
+            break
+        num_tries += 1
+    
     obj = create_object(response.text)
 
     if isHttpError(obj):
