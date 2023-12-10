@@ -42,7 +42,7 @@ def strip_po_data(lines):
             text = get_element_content(cell)
             stripped_fields_list.append(text)
 
-            if len(stripped_fields_list) == 7:
+            if len(stripped_fields_list) == 7 and stripped_fields_list[5] != FREEBIE_PRICE:
                 line_items.append(map_line_fields(stripped_fields_list))
 
     return line_items  
