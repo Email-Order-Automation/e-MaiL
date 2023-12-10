@@ -60,6 +60,7 @@ def add_lines(cr_id, num_qty_dict):
 
 def map_shipto_address(ship_to):
     return {
+        CUSTOMER_NAME: ship_to[0],
         ADDRESS_LINE1: ship_to[1],
         CITY: get_city(ship_to[2]),
         ZIP: get_zipcode(ship_to[2]),
@@ -68,8 +69,10 @@ def map_shipto_address(ship_to):
 
 ########################################################################################    
 
-def map_contact_address(address):
+def map_contact_address(contact):
+    address = contact.customerAddress
     return {
+        CUSTOMER_NAME: "",
         ADDRESS_LINE1: address.addressLine1,
         CITY: address.city,
         ZIP: address.zipCode,
@@ -86,7 +89,7 @@ def get_customer(ship_to, contact):
         return match_customer(uline_shipto_pageable, address)
 
     else:
-        address = map_contact_address(contact.customerAddress)
+        address = map_contact_address(contact)
         uline_shipto_pageable = search_customer(address)
         if isNotEmpty(uline_shipto_pageable):
             return match_customer(uline_shipto_pageable, address)
@@ -107,7 +110,7 @@ def runner(model_number_qty_dict, ship_to, contact):
     checkout_request = compute_order_summary(checkout_request_id)
 
     checkout_order = submit_checkout_request(g2_order_number, checkout_request_id, shipToCustomer, uline_contact)
-    print(checkout_order)
+
     print("\nOrder " + str(checkout_order.generalInfo.orderNumber) + " created\nChecking for holds...")
     order_status = wait_for_order_on_hold_pending_integration_or_new_order(g2_order_number)
     if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS):
@@ -120,9 +123,9 @@ def runner(model_number_qty_dict, ship_to, contact):
     integrate_order(g2_order_number)
     order_response = get_order_response(g2_order_number, SOURCED_FROM_LEGACY_ARG)
     if getattr(order_response, ORDER_STATUS_KEY):
-        print("Order " + str(g2_order_number) + " integrated to legacy\n")
+        print("Order " + str(g2_order_number) + " integrated\n")
     else:
-        print("Order integration failed\n")
+        print("Order " + str(g2_order_number) + " failed to integrate\n")
     
 ########################################################################################
 

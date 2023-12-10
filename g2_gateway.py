@@ -76,13 +76,23 @@ def search_customer(address):
     url += generate_param(POSTAL_CODE, address.get(ZIP))
     url += generate_param(STATE_PROV_CODE, address.get(STATE))
     url += generate_param(MARKED_DEL, False)
-
+    url_with_customer_name = url + generate_param(CUSTOMER_NAME, address.get(CUSTOMER_NAME))
+    
     response = requests.request(GET, url, headers=STANDARD_HEADERS)
     obj = create_object(response.text)
-
+    
     if isHttpError(obj):
         raise ConnectionError("Error in customer search")
-    else: return obj
+    if(obj.numberOfElements <= 1):
+        return obj
+    
+    response = requests.request(GET, url_with_customer_name, headers=STANDARD_HEADERS)
+    obj = create_object(response.text)
+    
+    if isHttpError(obj):
+        raise ConnectionError("Error in customer search")
+    return obj
+
 
 ######################################################################################## 
     
@@ -173,12 +183,15 @@ def submit_checkout_request(order_number, cr_id, shipToCustomer, contact):
         SUBMISSION_MODE: PRIMARY,
         KEEP_LOCKED: False
     })
+    
     response = requests.request(POST, OES_SUBMIT_URL.format(order_number, cr_id), headers=STANDARD_HEADERS, data=payload)
-    obj = create_object(response.text)
-
-    if isHttpError(obj):
+    
+    if(response.status_code > 200):
         raise ConnectionError("Error submitting checkout request: " + str(cr_id) + " with order number: " + str(order_number))
-    else: return obj
+
+    return create_object(response.text)
+        
+    
 
 ########################################################################################
 
