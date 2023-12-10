@@ -212,7 +212,7 @@ def wait_for_order_on_hold_pending_integration_or_new_order(order_number):
     
     num_checks = 0
     order_status = None
-    while num_checks < 4:
+    while num_checks < 8:
         order_response = get_order_response(order_number, SOURCED_FROM_DSE_ARG)
         order_status = order_response.orderStatus
         if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS or order_status == NEW_ORDER_STATUS):
