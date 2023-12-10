@@ -100,6 +100,7 @@ def get_customer(ship_to, contact):
 ########################################################################################
 
 def runner(model_number_qty_dict, ship_to, contact):
+    print("\nCreating order...")
     g2_order_number = get_order_number()
     uline_contact = search_contact(contact.name, contact.email)
     shipToCustomer = get_customer(ship_to, uline_contact)
@@ -111,7 +112,7 @@ def runner(model_number_qty_dict, ship_to, contact):
 
     checkout_order = submit_checkout_request(g2_order_number, checkout_request_id, shipToCustomer, uline_contact)
 
-    print("\nOrder " + str(checkout_order.generalInfo.orderNumber) + " created\nChecking for holds...")
+    print("Order " + str(checkout_order.generalInfo.orderNumber) + " created\nChecking for holds...")
     order_status = wait_for_order_on_hold_pending_integration_or_new_order(g2_order_number)
     if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS):
         print("Order " + str(g2_order_number) + " on hold")
