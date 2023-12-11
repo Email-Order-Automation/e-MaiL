@@ -28,3 +28,6 @@ LOCATION_SERVICE_BASE_URL = "http://dc2-svzgsys05.ulinedm.com:21156/location-ser
 
 ORDER_INTEGRATION_SERVICE_BASE_URL = "http://dc2-svzgsys07.ulinedm.com:11288/order-integration-service/v1"
 LEGACY_INTEGRATION_URL = ORDER_INTEGRATION_SERVICE_BASE_URL + "/legacy-integration"
+
+ORDER_VALIDATION_SERVICE_BASE_URL = "http://dc2-svzgsys07.ulinedm.com:11286/order-validation-service/v1"
+RUN_HOLD_CHECK_URL = ORDER_VALIDATION_SERVICE_BASE_URL + "/orders/{0}/release"

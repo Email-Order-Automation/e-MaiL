@@ -221,12 +221,16 @@ def wait_for_order_on_hold_pending_integration_or_new_order(order_number):
     
     num_checks = 0
     order_status = None
+    time.sleep(10)
+    if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS or order_status == NEW_ORDER_STATUS):
+            return order_status
     while num_checks < 8:
         order_response = get_order_response(order_number, SOURCED_FROM_DSE_ARG)
         order_status = order_response.orderStatus
+        num_checks += 1
+        run_hold_check(order_number)
         if(order_status == ON_HOLD_PENDING_INTEGRATION_STATUS or order_status == NEW_ORDER_STATUS):
             return order_status
-        num_checks += 1
         time.sleep(5)
     if(order_status == PENDING_SUBMIT_POST_PROCESSING_STATUS):
         raise ConnectionError("Order " + str(order_number) + " stuck in post processing")
@@ -251,4 +255,15 @@ def get_order_response(order_number, sourced_from):
     else: return obj
 
 ########################################################################################
-   
+
+def run_hold_check(order_number):
+    
+    url = RUN_HOLD_CHECK_URL
+    url = url.format(order_number)
+    payload = json.dumps({
+        SOURCE_APPLICATION_PARAM: HOQ_SOURCE_APPLICATION_PARAM
+    })
+    
+    requests.request(POST, url, headers=STANDARD_HEADERS, data=payload)
+
+########################################################################################
